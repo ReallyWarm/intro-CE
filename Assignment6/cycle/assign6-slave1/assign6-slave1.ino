@@ -9,6 +9,7 @@
 char mystr[MAX_MSG];
 bool haveAdr = false;
 bool haveMsg = false;
+bool reEvent = false;
 unsigned indexMsg = 10;
 
 void setup()
@@ -22,7 +23,7 @@ void loop()
 {
   indexMsg = 10;
   
-  while (Serial.available())
+  while (Serial.available() && reEvent)
   {
     char inChar = (char) Serial.read();
     if (!haveAdr) {
@@ -33,37 +34,41 @@ void loop()
         mystr[10] = '\0';
       }
     }
-    else{
+    else {
       if (inChar != '\n' && indexMsg < MAX_MSG - 1) {
         mystr[indexMsg] = inChar;
         indexMsg++;
       }
-      else {
+      if (Serial.available() == 0) {
         mystr[indexMsg] = '\0';
-        indexMsg = 10;
       }
     }
   }
   
   //Serial.println(mystr);
+  if (reEvent) {
+    Wire.beginTransmission(ADDR3);
+    Wire.write(mystr, sizeof(mystr));
+    Wire.endTransmission();
+  }
+  reEvent = false;
   
-  Wire.beginTransmission(ADDR3);
-  Wire.write(mystr, sizeof(mystr));
-  Wire.endTransmission();
-  
-  delay(1000);
 }
 
 void receiveEvent(int howMany)
 {
-  for (int i = 0; i < howMany; i++)
-    mystr[i] = Wire.read();
+  reEvent = true;
   
-  if (mystr[8] == '\0'){
+  for (int i = 0; i < howMany; i++)
+  {
+    mystr[i] = Wire.read();
+  }
+  
+  if (mystr[8] == '\0') {
     haveAdr = false;
     haveMsg = false;
   }
-  else{
+  else {
     haveAdr = true;
   }
   
@@ -73,6 +78,8 @@ void receiveEvent(int howMany)
   else {
     haveMsg = true;
   }
+
+  Serial.println(mystr);  
   
   if (haveMsg && mystr[8] == '0' + ADDR2) {
     for (int i = 10; mystr[i] != '\0'; i++)
@@ -83,6 +90,4 @@ void receiveEvent(int howMany)
     mystr[6] = '0';
     mystr[8] = '\0';
   }
-
-  Serial.println(mystr);
 }

@@ -16,10 +16,6 @@ void setup()
   Serial.begin(9600);
   Wire.begin(ADDR1);
   Wire.onReceive(receiveEvent);
-  
-  Wire.beginTransmission(ADDR2);
-  Wire.write(mystr, sizeof(mystr));
-  Wire.endTransmission();
 }
 
 void loop()
@@ -42,13 +38,13 @@ void loop()
         mystr[indexMsg] = inChar;
         indexMsg++;
       }
-      else {
+      if (Serial.available() == 0) {
         mystr[indexMsg] = '\0';
       }
     }
   }
-  //Serial.println(mystr);
   
+  //Serial.println(mystr);
   Wire.beginTransmission(ADDR2);
   Wire.write(mystr, sizeof(mystr));
   Wire.endTransmission();
@@ -77,6 +73,8 @@ void receiveEvent(int howMany)
   else {
     haveMsg = true;
   }
+
+  Serial.println(mystr);
   
   if (haveMsg && mystr[8] == '0' + ADDR1) {
     for (int i = 10; mystr[i] != '\0'; i++)
@@ -87,6 +85,4 @@ void receiveEvent(int howMany)
     mystr[6] = '0';
     mystr[8] = '\0';
   }
-  
-  Serial.println(mystr);
 }
