@@ -8,7 +8,6 @@
 
 char token[MAX_TOKEN];
 bool haveAdr = false;
-bool haveMsg = false;
 const unsigned indexMsg = 10;
 unsigned i = indexMsg;
 
@@ -56,10 +55,11 @@ void requestEvent()
       token[i] = '\0';
   }
   
-  Serial.println(token); // display token
+  //Serial.println(token); // display token
   
   if (token[6] == '1') { 
     int addr = token[8] - '0';
+    Serial.println(token); // display token
     
     if (addr == ADDR3) {
       for (i = indexMsg; token[i] != '\0'; i++)
@@ -69,6 +69,7 @@ void requestEvent()
       Serial.println();
       token[6] = '0';
       token[8] = '\0';
+      Serial.println(token);
     }
   }
   Wire.write(token, sizeof(token));

@@ -8,7 +8,6 @@
 
 char token[MAX_TOKEN] = "Token#0#";
 bool haveAdr = false;
-bool haveMsg = false;
 const unsigned indexMsg = 10;
 unsigned i = indexMsg;
 
@@ -56,9 +55,9 @@ void loop()
     }
     
     if(!Serial.available())
-      token[i+1] = '\0';
+      token[i] = '\0';
   }
-  sendToken();
+  if (token[6] == '1') sendToken();
   
   delay(1000);
 }
@@ -79,6 +78,13 @@ int readToken()
     
     if(!Wire.available())
       token[i] = '\0';
+  }
+
+  if (token[6] != '1') {
+    char restart[] = "Token#0#";
+    for (int i = 0; restart[i] != '\0'; i++)
+      token[i] = restart[i];
+    token[8] = '\0';
   }
 }
 
@@ -106,5 +112,6 @@ void sendToken()
     
     token[6] = '0';
     token[8] = '\0';
+    Serial.println(token);
   }
 }
